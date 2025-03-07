@@ -1,0 +1,28 @@
+[package]
+name = "curloo"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5.31", features = ["derive"] }
+reqwest = { version = "0.12.12", features = ["json"] }
+dotenv = "0.15.0"
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.138"
+tokio = { version = "1.43.0", features = ["full"] }
+anyhow = "1.0.96"
+libc = "0.2"
+regex = "1.11.1"
+text_io = "0.1.12"
+trait-variant = "0.1.2"
+console = "0.15.10"
+indicatif = "0.17.11"
+tabled = "0.18.0"
+dialoguer = "0.11.0"
+serde_yaml = "0.9.34"
+fs = "0.0.5"
+chrono = "0.4.40"
+md5 = "0.7.0"
+
+[dev-dependencies]
+mockito = "1.2.0"
