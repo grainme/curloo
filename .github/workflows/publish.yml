@@ -40,11 +40,15 @@ jobs:
             release_name: curloo-macos-arm64
             target: aarch64-apple-darwin
             use_cross: false
+    env:
+      OPENSSL_DIR: "/usr/lib/ssl"
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install musl-tools on Linux
-        run: sudo apt-get update --yes && sudo apt-get install --yes musl-tools
+      - name: Install OpenSSL (Linux)
+        run: |
+          sudo apt-get update --yes
+          sudo apt-get install --yes libssl-dev pkg-config
         if: contains(matrix.target, 'musl')
 
       - name: Install Rust toolchain
