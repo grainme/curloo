@@ -26,6 +26,7 @@ jobs:
 
       - name: Run tests
         run: cargo test --verbose
+  
 
   build-docker:
     runs-on: ubuntu-latest

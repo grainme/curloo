@@ -1,0 +1,84 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*.*.*"
+  pull_request:
+
+jobs:
+  publish:
+    name: Publish for ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: curloo
+            release_name: curloo-linux-x86_64
+            target: x86_64-unknown-linux-musl
+            use_cross: false
+          - os: windows-latest
+            artifact_name: curloo.exe
+            release_name: curloo-windows-x86_64.exe
+            target: x86_64-pc-windows-msvc
+            use_cross: false
+          - os: macos-latest
+            artifact_name: curloo
+            release_name: curloo-macos-x86_64
+            target: x86_64-apple-darwin
+            use_cross: false
+          - os: ubuntu-latest
+            artifact_name: curloo
+            release_name: curloo-linux-arm64
+            target: aarch64-unknown-linux-musl
+            use_cross: true
+          - os: macos-latest
+            artifact_name: curloo
+            release_name: curloo-macos-arm64
+            target: aarch64-apple-darwin
+            use_cross: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install musl-tools on Linux
+        run: sudo apt-get update --yes && sudo apt-get install --yes musl-tools
+        if: contains(matrix.target, 'musl')
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install cross
+        if: matrix.use_cross
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: |
+          if [ "${{ matrix.use_cross }}" = "true" ]; then
+            cross build --release --target ${{ matrix.target }}
+          else
+            cargo build --release --target ${{ matrix.target }}
+          fi
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.release_name }}
+          path: target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+
+      - name: Upload binaries to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+          asset_name: ${{ matrix.release_name }}
+          tag: ${{ github.ref }}
