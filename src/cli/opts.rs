@@ -2,10 +2,10 @@ use clap::Parser;
 
 #[derive(Parser, Debug)]
 #[command(name = "curloo")]
-#[command(version = "0.1")]
+#[command(version = "1.0.0")]
 #[command(
     about = "A friendly HTTP client for testing REST APIs.",
-    long_about = "Curloo combines the simplicity of curl with the interactivity of Postman. \
+    long_about = "Curloo is a lightweight HTTP client that combines command-line efficiency with interactive functionality. \
                   It supports both interactive (auto) and direct (manual) modes."
 )]
 pub struct Opts {
