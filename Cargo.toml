@@ -39,6 +39,7 @@ serde_yaml = "0.9.34"
 fs = "0.0.5"
 chrono = "0.4.40"
 md5 = "0.7.0"
+openssl = { version = "0.10", features = ["vendored"] }
 
 [dev-dependencies]
 mockito = "1.2.0"
