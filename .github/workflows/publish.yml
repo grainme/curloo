@@ -13,7 +13,7 @@ jobs:
     name: Publish for ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     permissions:
-      contents: write
+      contents: write # Required to upload assets to a release
     strategy:
       matrix:
         include:
@@ -78,13 +78,13 @@ jobs:
 
       - name: Build
         shell: bash
-        run: $BUILD_CMD build --release --target ${{ matrix.target }} ${{ matrix.additional_args }}
+        run: $BUILD_CMD build --profile release-ci --target ${{ matrix.target }} --locked --no-default-features --features rustls ${{ matrix.additional_args }}
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.release_name }}
-          path: target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+          path: target/${{ matrix.target }}/release-ci/${{ matrix.artifact_name }}
 
       - name: Debug GitHub Context
         run: |
@@ -96,6 +96,6 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+          file: target/${{ matrix.target }}/release-ci/${{ matrix.artifact_name }}
           asset_name: ${{ matrix.release_name }}
           tag: ${{ github.ref }}
