@@ -12,6 +12,8 @@ jobs:
   publish:
     name: Publish for ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
     strategy:
       matrix:
         include:
@@ -58,6 +60,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: stable
           targets: ${{ matrix.target }}
 
       - name: Install cross
@@ -83,8 +86,13 @@ jobs:
           name: ${{ matrix.release_name }}
           path: target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
 
+      - name: Debug GitHub Context
+        run: |
+          echo "Event Name: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+
       - name: Upload binaries to release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
