@@ -6,8 +6,7 @@ ENV OPENSSL_INCLUDE_DIR=/usr/include
 
 WORKDIR /app
 
-COPY Cargo.toml .
-RUN cargo fetch
+COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 
 RUN cargo build --release
