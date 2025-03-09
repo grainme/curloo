@@ -6,46 +6,41 @@ on:
   pull_request:
     branches: ["main"]
   release:
-    types: [created] 
+    types: [created]
 
 jobs:
-  test:
+  test-and-build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-    - run: cargo test --verbose
+      - uses: actions/checkout@v4
 
-  build-docker:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: ${{ github.event_name == 'push' }}
-        tags: |
-          your-dockerhub-username/curloo:latest
-          your-dockerhub-username/curloo:${{ github.sha }}
+      - name: Run tests
+        run: cargo test --verbose
+
+      - name: Build and push Docker image
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            grainme47/curloo:latest
+            grainme47/curloo:${{ github.sha }}
 
   release:
-    needs: [test, build-docker]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Build binaries
-      uses: cross-rs/cross-action@v1
-      with:
-        command: build --release --target x86_64-unknown-linux-musl
-    - uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          target/x86_64-unknown-linux-musl/release/curloo
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+
+      - name: Build binaries
+        uses: cross-rs/cross-action@v1
+        with:
+          command: build --release --target x86_64-unknown-linux-musl
+
+      - uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            target/x86_64-unknown-linux-musl/release/curloo
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
